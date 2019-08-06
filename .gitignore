@@ -16,7 +16,7 @@
 /build
 
 # json objs
-client/src/contracts
+client/src/contracts/*.json
 
 # misc
 .DS_Store
@@ -30,4 +30,3 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 client/src/components/game/Reacteroids.js_
-

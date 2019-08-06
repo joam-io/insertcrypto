@@ -224,6 +224,36 @@ contract CryptoArcade is Ownable, Pausable {
     }
 
     /**
+     * @dev Method that retrieves the top 10 ranking one piece of data at a time, 
+     * to avoid complex operations on-chain.
+     *
+     * @return The address of the entry in the top 10 'pos' position
+     */
+    function getRecordEntryAddress(uint256 _gameId, uint256 _pos)
+        public
+        view
+        returns (address)
+    {
+        require(_pos < 10 && _pos >= 0, "The position must be between 0 and 9");
+        return games[_gameId].getRecordEntryAddress(_pos);
+    }
+
+    /**
+     * @dev Method that retrieves the top 10 ranking one piece of data at a time, 
+     * to avoid complex operations on-chain.
+     *
+     * @return The score of the entry in the top 10 'pos' position
+     */
+    function getRecordEntryScore(uint256 _gameId, uint256 _pos)
+        public
+        view
+        returns (uint256)
+    {
+        require(_pos < 10 && _pos >= 0, "The position must be between 0 and 9");
+        return games[_gameId].getRecordEntryScore(_pos);
+    }
+
+    /**
      * @dev This method is a proxy to the game method that retrieves caller's number of shares in the common game pot.
      *
      * @param _gameId The id of the game

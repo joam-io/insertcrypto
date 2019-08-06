@@ -327,6 +327,28 @@ contract CryptoArcadeGame is Ownable, ICryptoArcadeGame {
     }
 
     /**
+     * @dev Method that retrieves the top 10 ranking one piece of data at a time, 
+     * to avoid complex operations on-chain.
+     *
+     * @return The address of the entry in the top 10 'pos' position
+     */
+    function getRecordEntryAddress(uint256 _pos) public view returns (address) {
+        require(_pos < 10 && _pos >= 0, "The position must be between 0 and 9");
+        return matches[topScores[_pos]].player;
+    }
+
+    /**
+     * @dev Method that retrieves the top 10 ranking one piece of data at a time, 
+     * to avoid complex operations on-chain.
+     *
+     * @return The score of the entry in the top 10 'pos' position
+     */
+    function getRecordEntryScore(uint256 _pos) public view returns (uint256) {
+        require(_pos < 10 && _pos >= 0, "The position must be between 0 and 9");
+        return matches[topScores[_pos]].score;
+    }
+
+    /**
      * @dev Method that returns the number of shares of a given player in the common game reward pot.
      *
      * @param _player The address of the player

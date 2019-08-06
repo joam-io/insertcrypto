@@ -69,15 +69,16 @@ export default function GameRanking(props) {
 							<th>Score</th>
 						</StyledTableHeader>
 						{ranking.length ? (
-							ranking.map(item => (
-								<StyledTr key={item.p}>
-									<td>{item.p + 1}</td>
+							ranking.map((item, index) => (
+								<StyledTr key={index}>
+									<td>{index + 1}</td>
 									<td>
-										{item.a !== '0x0000000000000000000000000000000000000000'
-											? item.a
+										{item.address !==
+										'0x0000000000000000000000000000000000000000'
+											? item.address
 											: '–'}
 									</td>
-									<td>{item.s !== '0' ? item.s : '–'}</td>
+									<td>{item.score !== '0' ? item.score : '–'}</td>
 								</StyledTr>
 							))
 						) : (
@@ -92,16 +93,26 @@ export default function GameRanking(props) {
 	);
 
 	async function updateTop10() {
-		let response = await instance.getRecordList(0, {
-			from: account
-		});
+		let address = null;
+		let score = null;
+		let top10 = [];
+
+		for (let i = 0; i < 10; i++) {
+			address = await instance.getRecordEntryAddress(0, i);
+			score = await instance.getRecordEntryScore(0, i);
+			top10.push({ address: address.toString(), score: score.toString() });
+		}
+
+		// let response = await instance.getRecordList(0, {
+		// 	from: account
+		// });
 
 		// console.log(response.toString());
 		// let obj = JSON.parse(response.toString());
 		// obj.map(item => {
 		// 	console.log(item.p + '. ' + item.a + ' -> ' + item.s);
 		// });
-		setRanking(JSON.parse(response.toString()));
+		setRanking(top10);
 	}
 
 	useEffect(() => {
