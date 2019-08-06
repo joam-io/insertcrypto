@@ -18,25 +18,21 @@ Current implementation consists on a React frontend that displays the player inf
 
 Smart Contracts control the game state, the purchased and played matches, the list with the top 10 scores and, the reward pot and the % for each player on the top ranking.
 
-The frontend doesn't work, I have been too optimistic in the effort required to pick up development again. The smart contracts do work and tests pass though.
-
-# Available Scripts
+## Available Scripts
 
 In the project root directory, you can run:
 
-### `truffle compile`
+#### `truffle compile`
 
-### `truffle migrate`
+#### `truffle migrate`
 
-### `truffle test`
+#### `truffle test`
 
 to compile, deploy and test the contracts.
 
 Inside the ./client directory, you can run:
 
-### `npm start`
+#### `npm run start`
 
 Runs the app in the development mode.<br>
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-**Note: Frontend is not fully completed and thus most of its functionality is unavailable**

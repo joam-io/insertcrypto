@@ -19,6 +19,10 @@ export default class Bullet {
 		this.radius = 2;
 	}
 
+	remove() {
+		this.delete = true;
+	}
+
 	destroy() {
 		this.delete = true;
 	}
@@ -43,7 +47,7 @@ export default class Bullet {
 		context.save();
 		context.translate(this.position.x, this.position.y);
 		context.rotate((this.rotation * Math.PI) / 180);
-		context.fillStyle = '#FFF';
+		context.fillStyle = '#CCB454';
 		context.lineWidth = 1;
 		context.beginPath();
 		context.arc(0, 0, 2, 0, 2 * Math.PI);

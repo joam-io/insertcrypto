@@ -6,27 +6,46 @@ import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
 import "./CryptoArcadeGame.sol";
 import "./RewardSplitter.sol";
 
-/// @author Mary A. Botanist
-/// @notice Calculate tree age in years, rounded up, for live trees
-/// @dev The Alexandr N. Tetearing algorithm could increase precision
-/// @param rings The number of rings from dendrochronological sample
-/// @return age in years, rounded up for partial years
+/**
+ * @title CryptoArcade
+ * @dev This contract is as a game factory and acts as a proxy between players and games.
+ * Operations related to the game will be delegated to the appropriate game instance.
+ * 
+ * There is a circuit breaker implemented that can only be operated by the owner account, in case a serious issue is detected.
+ */
 contract CryptoArcade is Ownable, Pausable {
-    // This contract represents game entities
-    // The idea is that games independent from the arcades they are registered to
-    // That provides greater flexibility as a gamer can buy a token for a game and spend it in any arcade
-    // The contract holds the address of the creators, the top 10 record table, the bounty and the purchased matches per gamer
-    // 1. Register new game
+    event LogGameRegistered(
+        address indexed creator,
+        string gameName,
+        uint256 price
+    );
+    event LogMatchPurchased(address indexed player, uint256 gameId);
+    event LogMatchStarted(
+        address indexed player,
+        uint256 indexed gameId,
+        uint256 indexed matchId
+    );
+    event LogMatchFinished(
+        address indexed player,
+        uint256 indexed gameId,
+        uint256 indexed matchId
+    );
+    event LogNewRecord(
+        address indexed player,
+        uint256 indexed gameId,
+        uint256 score
+    );
+    event LogRewardReleased(address indexed player, uint256 amount);
 
-    event LogGameRegistered(address indexed creator, string gameName);
-
+    // The list of games registered to the arcade
     mapping(uint256 => CryptoArcadeGame) private games;
+    // The unique game ID generator
     uint256 private numRegisteredGames;
 
-    // Returns ether paid in excess by the player
+    // Modifiyer that returns any ether paid in excess by the player
     modifier refundExcess(uint256 gameId) {
         _;
-        uint256 paidInExcess = msg.value - games[gameId].getGameMatchPrice();
+        uint256 paidInExcess = msg.value - games[gameId].gameMatchPrice();
         if (paidInExcess > 0) {
             msg.sender.transfer(paidInExcess);
         }
@@ -34,7 +53,33 @@ contract CryptoArcade is Ownable, Pausable {
 
     function() external payable {}
 
-    function registerGame(string memory _name, address _creator)
+    /**
+     * @dev Public constructor that registers a game at creation.
+     * The game is represented by the account of the game creator, a name and the cost of playing a match.
+     *
+     * A registration event is emitted if the creation is successful.
+     * @param _name The name of the game
+     * @param _creator The address of the creator
+     * @param _price The cost of one match
+     */
+    constructor(string memory _name, address _creator, uint256 _price) public {
+        uint256 gameId = numRegisteredGames++;
+
+        games[gameId] = new CryptoArcadeGame(_name, _creator, _price);
+
+        emit LogGameRegistered(_creator, _name, _price);
+    }
+
+    /**
+     * @dev Method to register a new game to the platform.
+     * 
+     *  Emits a game registration event if sucessful.
+     * @param _name The name of the game
+     * @param _creator The address of the creator
+     * @param _price The cost of one match
+     * @return The new game ID
+     */
+    function registerGame(string memory _name, address _creator, uint256 _price)
         public
         onlyOwner()
         whenNotPaused()
@@ -42,18 +87,17 @@ contract CryptoArcade is Ownable, Pausable {
     {
         uint256 gameId = numRegisteredGames++;
 
-        games[gameId] = new CryptoArcadeGame(_name, _creator);
+        games[gameId] = new CryptoArcadeGame(_name, _creator, _price);
 
-        emit LogGameRegistered(_creator, _name);
-    }
-    function deactivateGame(uint256 _gameId)
-        external
-        onlyOwner()
-        whenNotPaused()
-    {
-        games[_gameId].deactivateGame();
+        emit LogGameRegistered(_creator, _name, _price);
     }
 
+    /**
+     * @dev This methods enables all operations for a given game.
+     * Games can be deactivated without being removed, in case an issue is detected.
+     * 
+     * @param _gameId The id of the game to activate
+     */
     function activateGame(uint256 _gameId)
         external
         onlyOwner()
@@ -62,6 +106,40 @@ contract CryptoArcade is Ownable, Pausable {
         games[_gameId].activateGame();
     }
 
+    /**
+     * @dev This methods disables most of the operations for a given game.
+     * Games can be deactivated without being removed, in case an issue is detected.
+     * Deactivation keeps all related data safe while it reduces the operations available to authorised accounts.
+     * 
+     * @param _gameId The id of the game to deactivate
+     */
+    function deactivateGame(uint256 _gameId)
+        external
+        onlyOwner()
+        whenNotPaused()
+    {
+        games[_gameId].deactivateGame();
+    }
+
+    /**
+     * @dev Locates the price of a given game.
+     * 
+     * @param _gameId The id of the game
+     * @return The game's price per match
+     */
+    function matchPrice(uint256 _gameId) public view returns (uint256) {
+        return games[_gameId].gameMatchPrice();
+    }
+
+    /**
+     * @dev This method enables the purchase of game matches.
+     * The cost of the game is the price that the game owner defined at creation.
+     * The operation is relayed to the game contract for completion.
+     *
+     * If the purchase is successful a game purchased event is emitted. 
+     * @param _gameId The id of the game to deactivate
+     * @return The ID of the match purchased
+     */
     function purchaseMatch(uint256 _gameId)
         public
         payable
@@ -70,31 +148,73 @@ contract CryptoArcade is Ownable, Pausable {
         returns (uint256 matchId)
     {
         matchId = games[_gameId].purchaseMatch.value(msg.value)(msg.sender);
+        emit LogMatchPurchased(msg.sender, _gameId);
+
     }
 
-    function getMatchPlayer(uint256 _gameId, uint256 _matchId)
+    /**
+     * @dev This method looks up caller's available matches (those that are not in played status) and returns the total number.
+     *
+     * @param _gameId The id of the game
+     * @return The total number of matches for the caller that are not in played status
+     */
+    function getNumberOfAvailableMatches(uint256 _gameId)
         public
-        view
-        returns (address)
-    {
-        return games[_gameId].getMatchPlayer(_matchId);
-    }
-
-    function matchPlayed(uint256 _gameId, uint256 _matchId, uint256 _score)
-        public
-        returns (uint256 shares)
-    {
-        shares = games[_gameId].matchPlayed(_matchId, msg.sender, _score);
-    }
-
-    function getGameMatchScore(uint256 _gameId, uint256 _matchId)
-        external
         view
         returns (uint256)
     {
-        return games[_gameId].getGameMatchScore(_matchId);
+        return games[_gameId].getNumberOfAvailableMatches(msg.sender);
     }
 
+    /**
+     * @dev This method looks up caller's available matches (those that are not in played status) and returns the total number.
+     *
+     * @param _gameId The id of the game
+     * @return The total number of matches for the caller that are not in played status
+     */
+    function getGameMatchScore(uint256 _gameId) public view returns (uint256) {
+        return games[_gameId].getNumberOfAvailableMatches(msg.sender);
+    }
+
+    /**
+     * @dev This method flags a match as played, which consumes it.
+     * The status of the match becomes Played so its score can be associated to it.
+     *
+     * @param _gameId The id of the game
+     * @return The ID of the match started
+     */
+    function playMatch(uint256 _gameId) public returns (uint256 matchId) {
+        matchId = games[_gameId].playMatch(msg.sender);
+        emit LogMatchStarted(msg.sender, _gameId, matchId);
+    }
+
+    /**
+     * @dev This method is a proxy to the game method that stores the score of a match played, 
+     * calculates whether it falls in the top 10 in which case it also calculates and awards
+     * a number of shares to the player. How many depends on the position achieved.
+     *
+     * The method emits a match finished event and a new record one in case the score deserves it.
+     * @param _gameId The id of the game
+     * @param _score The score attained
+     * @return The number of shares produced by the score (zero if the score doesn't make it to the top 10)
+     */
+    function matchPlayed(uint256 _gameId, uint256 _score)
+        public
+        returns (uint256 shares)
+    {
+        shares = games[_gameId].matchPlayed(msg.sender, _score);
+        if (shares > 0) {
+            emit LogNewRecord(msg.sender, _gameId, _score);
+        }
+        emit LogMatchFinished(msg.sender, _gameId, _score);
+    }
+
+    /**
+     * @dev This method is a proxy to the game method that retrieves the top 10 ranking.
+     *
+     * @param _gameId The id of the game
+     * @return A string that contains the JSON object with the top 10 list
+     */
     function getRecordList(uint256 _gameId)
         external
         view
@@ -103,10 +223,30 @@ contract CryptoArcade is Ownable, Pausable {
         return games[_gameId].getRecordList();
     }
 
+    /**
+     * @dev This method is a proxy to the game method that retrieves caller's number of shares in the common game pot.
+     *
+     * @param _gameId The id of the game
+     * @return Caller's total number of shares
+     */
+    function playerBalance(uint256 _gameId) external view returns (uint256) {
+        return games[_gameId].playerBalance(msg.sender);
+    }
+
+    /**
+     * @dev This method is a proxy to the game pull method that retrieves the balance for a player.
+     *
+     * The method emits a reward released event.
+     * @param _gameId The id of the game
+     * @param _player The player
+     * @return True if player's balance is released successfully
+     */
     function releaseReward(uint256 _gameId, address payable _player)
         public
-        returns (uint256 amount)
+        returns (bool)
     {
-        amount = games[_gameId].releaseReward(_player);
+        uint256 amount = games[_gameId].releaseReward(_player);
+        emit LogRewardReleased(_player, amount);
+        return true;
     }
 }

@@ -31,7 +31,9 @@ contract('CryptoArcadeGame', function(accounts) {
 	};
 
 	beforeEach(async () => {
-		instance = await CryptoArcadeGame.new(game.name, game.creator);
+		instance = await CryptoArcadeGame.new(game.name, game.creator, matchPrice, {
+			from: deployerAccount
+		});
 	});
 
 	describe('Setup', async () => {
@@ -45,33 +47,76 @@ contract('CryptoArcadeGame', function(accounts) {
 		});
 	});
 
+	describe('purchaseMatch()', async () => {
+		it('A match can be purchased from an existing game', async () => {
+			await instance.purchaseMatch(player1Account, {
+				value: matchPrice
+			});
+
+			const availableMatches = await instance.getNumberOfAvailableMatches(
+				player1Account
+			);
+
+			assert.equal(availableMatches, 1, 'the match count should be the same');
+		});
+	});
+
+	describe('matchPlayed()', async () => {
+		it('The number of matches available to play should be correct', async () => {
+			await instance.purchaseMatch(player1Account, {
+				value: matchPrice
+			});
+			await instance.purchaseMatch(player1Account, {
+				value: matchPrice
+			});
+
+			await instance.playMatch(player1Account);
+
+			await instance.matchPlayed(player1Account, 100);
+
+			await instance.playMatch(player1Account);
+
+			await instance.matchPlayed(player1Account, 100);
+		});
+	});
+
 	describe('Functions', () => {
 		describe('releaseReward()', async () => {
 			it('the reward is transferred to the player by explicit request', async () => {
 				await instance.purchaseMatch(player1Account, {
-					from: player1Account,
+					from: deployerAccount,
 					value: matchPrice
 				});
 
 				await instance.purchaseMatch(player2Account, {
-					from: player2Account,
+					from: deployerAccount,
 					value: matchPrice
 				});
 
 				await instance.purchaseMatch(player3Account, {
-					from: player3Account,
+					from: deployerAccount,
 					value: matchPrice
 				});
 
-				await instance.matchPlayed(1, player1Account, match2.score, {
+				await instance.playMatch(player1Account, {
 					from: deployerAccount
 				});
 
-				await instance.matchPlayed(2, player2Account, match2.score * 2, {
+				await instance.matchPlayed(player1Account, match2.score, {
 					from: deployerAccount
 				});
 
-				await instance.matchPlayed(3, player3Account, match2.score / 2, {
+				await instance.playMatch(player2Account, {
+					from: deployerAccount
+				});
+
+				await instance.matchPlayed(player2Account, match2.score * 2, {
+					from: deployerAccount
+				});
+
+				await instance.playMatch(player3Account);
+
+				await instance.matchPlayed(player3Account, match2.score / 2, {
 					from: deployerAccount
 				});
 

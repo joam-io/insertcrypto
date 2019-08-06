@@ -12,7 +12,14 @@ const RewardSplitter = artifacts.require('./RewardSplitter.sol');
 //const Zenny = artifacts.require('./Zenny.sol');
 
 const totalSupply = 80000000;
-const name = 'Reacteroids';
+
+const game1 = {
+	name: 'Reacteroids',
+	creator: '0x522fe0d2f80f7877f940Eab0c95F4B535c8d8797',
+	price: 4810000000000000
+};
+
+const arcadeOperator = '0xDd0f1B9a4064460A4522e37B5Af46dE814F75bED';
 
 module.exports = async function(deployer, network, accounts) {
 	// await deployer.deploy(SimpleStorage);
@@ -20,8 +27,13 @@ module.exports = async function(deployer, network, accounts) {
 	await deployer.deploy(RewardSplitter);
 	await deployer.link(Strings, CryptoArcade);
 	await deployer.link(Strings, CryptoArcadeGame);
-	await deployer.deploy(CryptoArcadeGame, name, accounts[0]);
-	await deployer.deploy(CryptoArcade);
+	await deployer.deploy(
+		CryptoArcadeGame,
+		game1.name,
+		game1.creator,
+		game1.price
+	);
+	await deployer.deploy(CryptoArcade, game1.name, arcadeOperator, game1.price);
 
 	if (network === 'development') {
 		// In a test environment an ERC777 token requires deploying an ERC1820 registry

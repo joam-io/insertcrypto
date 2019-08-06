@@ -3,12 +3,24 @@ pragma solidity ^0.5.0;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
+/**
+ * @title RewardSplitter
+ * @dev This contract is based on OpenZeppelin's PaymentSplitter.
+ * The original contract didn't allow the addition of new payees and the logic in calculating the reward 
+ * has been modfied. In esence it still allows the split of Ether payments among a group of accounts.
+ * The sender does not need to be aware that the Ether will be split in this way since
+ * it is handled transparently by the contract.
+ *
+ * The contract follows a _pull payment_ pattern. This means that payments are not automatically forwarded to the
+ * accounts but kept in this contract, and the actual transfer is triggered as a separate step by calling the {release}
+ * function.
+ */
 contract RewardSplitter is Ownable {
     using SafeMath for uint256;
 
+    event PaymentReceived(address from, uint256 amount);
     event PayeeAdded(address account, uint256 position, uint256 shares);
     event PaymentReleased(address to, uint256 amount);
-    event PaymentReceived(address from, uint256 amount);
 
     uint256 private totalShares;
     uint256 private totalReleased;
@@ -59,15 +71,22 @@ contract RewardSplitter is Ownable {
             .div(totalShares)
             .sub(amountReleased[_account]);
 
-        require(_payment != 0, "RewardSplitter: account is not due payment");
+        require(_payment > 0, "RewardSplitter: account is not due payment");
 
         amountReleased[_account] = amountReleased[_account].add(_payment);
         totalReleased = totalReleased.add(_payment);
 
         _account.transfer(_payment);
+        // address(_account).call.value(_payment);
         emit PaymentReleased(_account, _payment);
     }
 
+    /**
+     * @dev This method calculates the reward of a position based on an adhoc scale.
+     *
+     * @param _pos The position obtained in the ranking, from 0 to 9. Positions greater than 9 get no reward.
+     * @return The number of shares attained
+     */
     function calculateReward(uint256 _pos)
         internal
         pure
@@ -112,9 +131,11 @@ contract RewardSplitter is Ownable {
     }
 
     /**
-     * @dev Add a new payee to the contract.
-     * @param _account The address of the payee to add.
-     * @param _pos The number of shares owned by the payee.
+     * @dev Add a new payee to the contract
+     * 
+     * @param _account The address of the payee to add
+     * @param _pos The position attain in the ranking
+     * @return The number of shares attained for the given position
      */
     function addPayee(address _account, uint256 _pos)
         public
@@ -128,8 +149,10 @@ contract RewardSplitter is Ownable {
 
         _shares = calculateReward(_pos);
 
-        playerShares[_account] = playerShares[_account].add(_shares);
-        totalShares = totalShares.add(_shares);
-        emit PayeeAdded(_account, _pos, _shares);
+        if (_shares > 0) {
+            playerShares[_account] = playerShares[_account].add(_shares);
+            totalShares = totalShares.add(_shares);
+            emit PayeeAdded(_account, _pos, _shares);
+        }
     }
 }
