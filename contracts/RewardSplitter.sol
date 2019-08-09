@@ -76,8 +76,8 @@ contract RewardSplitter is Ownable {
         amountReleased[_account] = amountReleased[_account].add(_payment);
         totalReleased = totalReleased.add(_payment);
 
-        _account.transfer(_payment);
-        // address(_account).call.value(_payment);
+        // _account.transfer(_payment);
+        address(_account).call.value(_payment);
         emit PaymentReleased(_account, _payment);
     }
 
