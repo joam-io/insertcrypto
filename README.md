@@ -22,21 +22,32 @@ Smart Contracts control the game state, the purchased and played matches, the li
 
 ## Available Scripts
 
-In the project root directory, you can run:
+In the project root directory, please run:
+
+#### `npm install`
+
+This step will install dependencies on Openzeppelin lib contracts.
 
 #### `truffle compile`
 
 #### `truffle migrate`
 
-Truffle migrate might give an error due to the deployment exceeding the gas limits. To fix this please modify your local node configuration to run on a 8000000 gas limit (in Ganache this is done with the paramether --gasLimit=8000000)
+Truffle migration script might return an error due to the deployment exceeding the gas limits. To fix this please modify your local node configuration to run on a 8000000 gas limit (in Ganache this is done with the paramether --gasLimit=8000000)
 
 #### `truffle test`
 
 to compile, deploy and test the contracts.
 
-Inside the ./client directory, you can run:
+Inside the ./client directory, please run:
+
+#### `npm install`
 
 #### `npm run start`
 
-Runs the app in the development mode.<br>
+This command runs the app in the development mode.
+<br>
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+**NOTE 1:** Contracts are not deployed to mainnet or testnets thus it requires you to run a local node (Ganache) running on port 8545 to deploy contracts and connect to them.
+
+**NOTE 2:** Sometimes Metamask extension returns an error (3206) when the app tries to connect to the local node. This issue is sorted by changing metamask to Mainnet and then back again to localhost:8545
