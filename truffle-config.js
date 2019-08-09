@@ -9,13 +9,12 @@ module.exports = {
 			host: 'localhost',
 			port: 8545,
 			network_id: '*',
-			gasPrice: 0x1,
-			gas: 0x1fffffffffffff
+			gas: 8000000
 		}
 	},
 	compilers: {
 		solc: {
-			version: '0.5.4',
+			version: '0.5.0',
 			settings: {
 				optimizer: {
 					enabled: true,
