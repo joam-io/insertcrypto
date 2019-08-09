@@ -62,14 +62,12 @@ contract('RewardSplitter', function(accounts) {
 					from: deployerAccount
 				});
 
-				const initialBalance = await web3.eth.getBalance(player1Account);
-
 				await instance.release(player1Account);
 
-				const finalBalance = await web3.eth.getBalance(player1Account);
+				const player1Amount = await instance.getReleasedAmount(player1Account);
 
 				assert.equal(
-					finalBalance - initialBalance,
+					player1Amount.toString(),
 					matchPrice,
 					'Payment should equal 100% of the available balance.'
 				);
@@ -87,22 +85,19 @@ contract('RewardSplitter', function(accounts) {
 					from: deployerAccount
 				});
 
-				const initialBalancePlayer1 = await web3.eth.getBalance(player1Account);
-				const initialBalancePlayer2 = await web3.eth.getBalance(player2Account);
+				await instance.release(player1Account);
+				await instance.release(player2Account);
 
-				const paymentPlayer1 = await instance.release(player1Account);
-				const paymentPlayer2 = await instance.release(player2Account);
-
-				const finalBalancePlayer1 = await web3.eth.getBalance(player1Account);
-				const finalBalancePlayer2 = await web3.eth.getBalance(player2Account);
+				const player1Amount = await instance.getReleasedAmount(player1Account);
+				const player2Amount = await instance.getReleasedAmount(player2Account);
 
 				assert.equal(
-					finalBalancePlayer1 - initialBalancePlayer1,
+					player1Amount.toString(),
 					matchPrice,
 					'Payment should equal 50% of the available balance.'
 				);
 				assert.equal(
-					finalBalancePlayer2 - initialBalancePlayer2,
+					player2Amount.toString(),
 					matchPrice,
 					'Payment should equal 50% of the available balance.'
 				);

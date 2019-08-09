@@ -206,11 +206,9 @@ contract('CryptoArcade', function(accounts) {
 					});
 				}
 
-				let result = await instance.getRecordList(0);
+				let result = await instance.getRecordEntryScore(0, 0); // get the top position
 
-				let obj = JSON.parse(result);
-
-				assert.equal(obj[0].s, 90, 'the top score should be 90');
+				assert.equal(result.toNumber(), 90, 'the top score should be 90');
 			});
 		});
 	});
