@@ -26,6 +26,8 @@ In the project root directory, you can run:
 
 #### `truffle migrate`
 
+Truffle migrate might give an error due to the deployment exceeding the gas limits. To fix this please modify your local node configuration to run on a 8000000 gas limit (in Ganache this is done with the paramether --gasLimit=8000000)
+
 #### `truffle test`
 
 to compile, deploy and test the contracts.
@@ -36,3 +38,5 @@ Inside the ./client directory, you can run:
 
 Runs the app in the development mode.<br>
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+Note: Current version only retrieves the record list once at wallet connection. Until fixed in the code, to update the list please reload the page.
