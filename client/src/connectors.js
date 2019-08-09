@@ -15,12 +15,14 @@ const {
 } = Connectors;
 
 // const supportedNetworkURLs = {
-// 	1: 'https://mainnet.infura.io/v3/60ab76e16df54c808e50a79975b4779f4',
-// 	4: 'https://rinkeby.infura.io/v3/7efa80cf885e455cafe8ddcbef936e84'
+// 	// 1: 'https://mainnet.infura.io/v3/60ab76e16df54c808e50a79975b4779f4',
+// 	4: 'https://rinkeby.infura.io/v3/7efa80cf885e455cafe8ddcbef936e84',
+// 	6: 'https://localhost:8545'
 // };
 
-//const defaultNetwork = 4;
+// const defaultNetwork = 4;
 
+// const MetaMask = new InjectedConnector({ supportedNetworks: [4, 6] });
 const MetaMask = new InjectedConnector({});
 
 // const Network = new NetworkOnlyConnector({
