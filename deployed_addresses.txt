@@ -1,0 +1,4 @@
+Contracts deployed to Rinkeby:
+- RewardSplitter.sol: 0xe85BF6656408272B6B979d0cc07C1f6dF779caF9
+- CryptoArcadeGame.sol: 0x52DbCef3da4E559fcec11aB155BaeA37c2e17775
+- CryptoArcade.sol: 0x0371e87E6d3e60500C5f1b6F381F7e5be34f184B
