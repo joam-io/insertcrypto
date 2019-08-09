@@ -5,7 +5,6 @@ import "openzeppelin-solidity/contracts/math/Math.sol";
 
 import "./ICryptoArcadeGame.sol";
 import "./RewardSplitter.sol";
-import "./Strings.sol";
 
 /**
  * @title CryptoArcadeGame
@@ -23,12 +22,8 @@ contract CryptoArcadeGame is Ownable, ICryptoArcadeGame {
         uint256 score
     );
 
-    using Strings for string;
-    using Strings for uint256;
-    using Strings for address;
-
     // The default match price
-    uint256 public MATCH_PRICE = 4810000000000000 wei;
+    uint256 public MATCH_PRICE;
 
     // A match can be in 2 states: NotPlayed (when purchased) and Played
     enum MatchStatus {NotPlayed, Played}
@@ -299,31 +294,6 @@ contract CryptoArcadeGame is Ownable, ICryptoArcadeGame {
         }
 
         return pos;
-    }
-
-    /**
-     * @dev Method that retrieves the top 10 ranking.
-     *
-     * @return A string with the JSON object that contains the top 10 list
-     */
-    function getRecordList() external view returns (string memory list) {
-        list = "[";
-        for (uint256 i = 0; i < topScores.length; i++) {
-            list = list.strConcat("{\"p\":").strConcat(i.uint2str()).strConcat(
-                ", "
-            );
-            list = list.strConcat("\"a\":\"").strConcat(
-                matches[topScores[i]].player.addressToString()
-            );
-            list = list
-                .strConcat("\", \"s\":")
-                .strConcat(matches[topScores[i]].score.uint2str())
-                .strConcat("}");
-            if (i < topScores.length - 1) {
-                list = list.strConcat(",");
-            }
-        }
-        list = list.strConcat("]");
     }
 
     /**

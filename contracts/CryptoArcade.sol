@@ -210,20 +210,6 @@ contract CryptoArcade is Ownable, Pausable {
     }
 
     /**
-     * @dev This method is a proxy to the game method that retrieves the top 10 ranking.
-     *
-     * @param _gameId The id of the game
-     * @return A string that contains the JSON object with the top 10 list
-     */
-    function getRecordList(uint256 _gameId)
-        external
-        view
-        returns (string memory)
-    {
-        return games[_gameId].getRecordList();
-    }
-
-    /**
      * @dev Method that retrieves the top 10 ranking one piece of data at a time, 
      * to avoid complex operations on-chain.
      *
