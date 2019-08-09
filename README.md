@@ -18,6 +18,8 @@ Current implementation consists on a React frontend that displays the player inf
 
 Smart Contracts control the game state, the purchased and played matches, the list with the top 10 scores and, the reward pot and the % for each player on the top ranking.
 
+**Note: Current version only retrieves the ranking list once at wallet connection. Until fixed in the code, to update the list please reload the page.**
+
 ## Available Scripts
 
 In the project root directory, you can run:
@@ -38,5 +40,3 @@ Inside the ./client directory, you can run:
 
 Runs the app in the development mode.<br>
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-Note: Current version only retrieves the record list once at wallet connection. Until fixed in the code, to update the list please reload the page.
