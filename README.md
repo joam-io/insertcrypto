@@ -48,7 +48,7 @@ This command runs the app in the development mode.
 <br>
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-**NOTE 1:** Contracts are not deployed to mainnet or testnets thus it requires you to run a local node (Ganache) running on port 8545 to deploy contracts and connect to them.
+**NOTE 1:** Contracts are deployed to the Rinkeby testnet in case you don't want to run a local node. Local nodes are expected to run on port 8545.
 
 **NOTE 2:** Sometimes Metamask extension returns an error (3206) when the app tries to connect to the local node. This issue is sorted by changing metamask to Mainnet and then back again to localhost:8545
 
