@@ -16,7 +16,6 @@
 /client/build
 
 # json objs
-client/src/contracts/*.json
 client/package-lock.json
 package-lock.json
 
