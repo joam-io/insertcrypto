@@ -1,6 +1,6 @@
 # Description
 
-Insert Crypto is a web3 gaming platform that rethinks the video arcade experience of the 80s and 90s. Through the browser, players can gather around a game (for this project the one chosen is Asteroids). To play they pay a small fee (50¢) in Ether. This amount is automatically splitted in 3 parts: 30% goes to the operator of the virtual arcade, 30% to a game pot and 40% to the game creators.
+[Insert Crypto](http://insertcrypto.com) is a web3 gaming platform that rethinks the video arcade experience of the 80s and 90s. Through the browser, players can gather around a game (for this project the one chosen is Asteroids). To play they pay a small fee (50¢) in Ether. This amount is automatically splitted in 3 parts: 30% goes to the operator of the virtual arcade, 30% to a game pot and 40% to the game creators.
 
 The game creators and operators also receive Zennies. A Zenny is a ERC777 token that is minted every time a player inserts crypto to play.
 
